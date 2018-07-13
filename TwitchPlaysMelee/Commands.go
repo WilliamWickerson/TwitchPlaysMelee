@@ -14,6 +14,7 @@ type helpCommand struct {
 }
 
 func NewCommand(tm irc.TwitchMessage) Command {
+	//Instantiate matching object or return nil if unknown command
 	switch(strings.ToLower(tm.Body)) {
 		case "!help":
 			return helpCommand{};

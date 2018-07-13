@@ -10,14 +10,13 @@ type GamecubeController struct {
 	STICKX, STICKY, CX, CY, LANA, RANA float64;
 }
 
+//Floats default to 0 so having the sticks default to center is desired
 func NewGamecubeController() GamecubeController {
 	return GamecubeController{
 		STICKX : .5,
 		STICKY : .5,
 		CX : .5,
 		CY : .5,
-		LANA : .5,
-		RANA : .5,
 	}
 }
 

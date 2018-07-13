@@ -27,5 +27,5 @@ func TestController(t *testing.T) {
 	c.SetAxis(3000, Rx);
 	c.SetButton(true, 8);
 	c.Reset();
-	//c.Close();
+	c.Close();
 }
