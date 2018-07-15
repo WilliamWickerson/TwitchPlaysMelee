@@ -42,8 +42,8 @@ func NewIRCClient(address string, port int, nick string, pass string) IRCClient 
   conn, error := net.Dial("tcp", address + ":" + strconv.Itoa(port));
   //If there was an error then exit
   if error != nil {
-    fmt.Printf("It fucked up!\n");
-    os.Exit(1);
+    fmt.Printf("Error, connection to IRC Host could not be made!\n");
+    return nil;
   }
   //Create a new ircClient from the connection
   ircClient := &ircClient {
