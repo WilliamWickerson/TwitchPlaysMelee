@@ -17,6 +17,8 @@ func NewGamecubeController() GamecubeController {
 		STICKY : .5,
 		CX : .5,
 		CY : .5,
+		LANA : .5,
+		RANA : .5,
 	}
 }
 
@@ -34,7 +36,7 @@ const (
 	DUP = 10;
 	DRIGHT = 11;
 	DDOWN = 12;
-    //Constants to map the 6 axes
+	//Constants to map the 6 axes
 	STICKX = vJoy.X;
 	STICKY = vJoy.Y;
 	CX = vJoy.Rx;

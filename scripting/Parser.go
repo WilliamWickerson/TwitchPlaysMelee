@@ -18,6 +18,5 @@ func NewParser(s Scanner) Parser {
 }
 
 func (p parser) Parse() AST.Script {
-	script := AST.Script{};
-	return script;
+	return AST.Script{};
 }

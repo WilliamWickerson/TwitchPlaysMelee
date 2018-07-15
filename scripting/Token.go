@@ -37,4 +37,5 @@ const (
 	KW_DRIGHT;
 	KW_DUP;
 	KW_DDOWN;
+	EOF;
 )
