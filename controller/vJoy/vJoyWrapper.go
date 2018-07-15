@@ -121,7 +121,7 @@ func GetSerialNumberString() string {
 }
 
 func DriverMatch() (bool,int,int) {
-	//Get the versions and return whether they match along with the two versions
+	//Get the versions and return whether they match along with the version numbers
 	var verDrv, verDll C.WORD;
 	success := C.DriverMatch(&verDrv, &verDll) != 0;
 	return success, int(verDrv), int(verDll);

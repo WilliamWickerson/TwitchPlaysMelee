@@ -1,5 +1,4 @@
 .idea/
 main/vJoyInterface.dll
 controller/vJoy/vJoyInterface.dll
-TwitchPlaysMelee
-main/login.json
+TwitchPlaysMelee/login.json
