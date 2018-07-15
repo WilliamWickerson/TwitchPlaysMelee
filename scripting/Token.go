@@ -1,0 +1,40 @@
+package scripting
+
+type Token struct {
+	Type Type;
+}
+
+type Type int;
+
+const (
+	INTLITERAL = iota,
+	FLOATLITERAL,
+	IDENTIFIER,
+	COMMA,
+	SEMICOLON,
+	HYPHEN,
+	OPENPAREN,
+	CLOSEPAREN,
+	KW_PRESS,
+	KW_UNPRESS,
+	KW_STICK,
+	KW_CSTICK,
+	KW_CENTER,
+	KW_LEFT,
+	KW_RIGHT,
+	KW_UP,
+	KW_DOWN,
+	KW_TILT,
+	KW_A,
+	KW_B,
+	KW_X,
+	KW_Y,
+	KW_Z,
+	KW_L,
+	KW_R,
+	KW_START,
+	KW_DLEFT,
+	KW_DRIGHT,
+	KW_DUP,
+	KW_DDOWN
+)
