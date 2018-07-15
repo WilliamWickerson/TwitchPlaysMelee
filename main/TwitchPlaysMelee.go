@@ -3,9 +3,12 @@ package main
 import (
 	"irc"
 	"fmt"
+	"time"
+	"controller"
+	"controller/vJoy"
 )
 
-func main() {
+func smain() {
 	//Get the login from login.json
 	login := GetLogin();
 	//Create an IRC client and join desired chat
@@ -24,4 +27,25 @@ func main() {
 		}
 	}
 
+}
+
+func main() {
+	gc1 := controller.NewGamecubeController();
+	gc2 := controller.NewGamecubeController();
+	gc3 := controller.NewGamecubeController();
+	gc4 := controller.NewGamecubeController();
+	gc2.RANA = .33;
+	gc3.RANA = .66;
+	gc4.RANA = 1;
+	vJoy := vJoy.NewVJoyController();
+	for {
+		time.Sleep(500*time.Millisecond);
+		controller.SetvJoy(vJoy, gc1);
+		time.Sleep(500*time.Millisecond);
+		controller.SetvJoy(vJoy, gc2);
+		time.Sleep(500*time.Millisecond);
+		controller.SetvJoy(vJoy, gc3);
+		time.Sleep(500*time.Millisecond);
+		controller.SetvJoy(vJoy, gc4);
+	}
 }

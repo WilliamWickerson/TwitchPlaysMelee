@@ -1,7 +1,7 @@
-package main
+package controller
 
 import (
-	"vJoy"
+	"controller/vJoy"
 )
 
 type GamecubeController struct {
@@ -58,10 +58,10 @@ func SetvJoy(c vJoy.VJoyController, gc GamecubeController) {
 	c.SetButton(gc.DRIGHT, DRIGHT);
 	c.SetButton(gc.DDOWN, DDOWN);
 	//Set the 6 axes based on the Gamecube Controller State
-	c.SetAxis(int(gc.STICKX*32684), STICKX);
-	c.SetAxis(int(gc.STICKY*32684), STICKY);
-	c.SetAxis(int(gc.CX*32684), CX);
-	c.SetAxis(int(gc.CY*32684), CY);
-	c.SetAxis(int(gc.LANA*32684), LANA);
-	c.SetAxis(int(gc.RANA*32684), RANA);
+	c.SetAxis(int(gc.STICKX*32768), STICKX);
+	c.SetAxis(int(gc.STICKY*32768), STICKY);
+	c.SetAxis(int(gc.CX*32768), CX);
+	c.SetAxis(int(gc.CY*32768), CY);
+	c.SetAxis(int(gc.LANA*16384 + 16384), LANA);
+	c.SetAxis(int(gc.RANA*16384 + 16384), RANA);
 }

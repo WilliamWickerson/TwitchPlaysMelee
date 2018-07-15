@@ -74,14 +74,16 @@ func (c vJoyController) SetButton(press bool, button int) {
 func (c vJoyController) Reset() {
 	//For some reason resetVJD(handle) doesn't work so reset buttons then axes
 	C.ResetButtons(c.handle);
+	//Put all axes to center
 	c.SetAxis(16384, X);
 	c.SetAxis(16384, Y);
 	c.SetAxis(16384, Z);
 	c.SetAxis(16384, Rx);
 	c.SetAxis(16384, Ry);
 	c.SetAxis(16384, Rz);
-	c.SetAxis(0, Sl0);
-	c.SetAxis(0, Sl1);
+	//For some reason <16384 reads negative values? so set them to 16384
+	c.SetAxis(16384, Sl0);
+	c.SetAxis(16384, Sl1);
 }
 
 func (c vJoyController) Close() {

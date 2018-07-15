@@ -12,6 +12,13 @@ type Login struct {
 	Pass string `json:"pass"`;
 }
 
+/*
+Reads in login.json from execution root directory of the form:
+{
+  "nick" : <username>,
+  "pass" : <twitch oauth>
+}
+*/
 func GetLogin() Login {
 	//Open the login file, if it can't be opened then exit
 	loginFile, err := os.Open("login.json");
