@@ -6,6 +6,7 @@ import (
 	"time"
 	"controller"
 	"controller/vJoy"
+	"scripting"
 )
 
 func smain() {
@@ -38,6 +39,7 @@ func main() {
 	gc3.RANA = .66;
 	gc4.RANA = 1;
 	vJoy := vJoy.NewVJoyController();
+	fmt.Printf("%d\n", scripting.KW_DDOWN);
 	for {
 		time.Sleep(500*time.Millisecond);
 		controller.SetvJoy(vJoy, gc1);

@@ -35,14 +35,14 @@ and avoids a switch statement later
 type Axis int;
 
 const (
-	X = C.HID_USAGE_X
-	Y = C.HID_USAGE_Y
-	Z = C.HID_USAGE_Z
-	Rx = C.HID_USAGE_RX
-	Ry = C.HID_USAGE_RY
-	Rz = C.HID_USAGE_RZ
-	Sl0 = C.HID_USAGE_SL0
-	Sl1 = C.HID_USAGE_SL1
+	X = C.HID_USAGE_X;
+	Y = C.HID_USAGE_Y;
+	Z = C.HID_USAGE_Z;
+	Rx = C.HID_USAGE_RX;
+	Ry = C.HID_USAGE_RY;
+	Rz = C.HID_USAGE_RZ;
+	Sl0 = C.HID_USAGE_SL0;
+	Sl1 = C.HID_USAGE_SL1;
 )
 
 func NewVJoyController() VJoyController {
