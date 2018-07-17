@@ -8,7 +8,7 @@
 #cstick ...
 #stick center; stick tilt (2,3) 3-4;
 
-macro-identifier := [a-zA-Z\-]+
+macro-identifier := [a-zA-Z][a-zA-Z\-]*
 keywords := press | unpress | stick | cstick | center | left | right | up | down | tilt
             | A | B | X | Y | Z | L | R | START | DLEFT | DRIGHT | DUP | DDOWN
 int-literal := [1-9][0-9]* | 0

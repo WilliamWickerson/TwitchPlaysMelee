@@ -3,10 +3,8 @@ package main
 import (
 	"irc"
 	"fmt"
-	"time"
-	"controller"
-	"controller/vJoy"
 	"scripting"
+	"controller/vJoy"
 )
 
 func smain() {
@@ -31,23 +29,9 @@ func smain() {
 }
 
 func main() {
-	gc1 := controller.NewGamecubeController();
-	gc2 := controller.NewGamecubeController();
-	gc3 := controller.NewGamecubeController();
-	gc4 := controller.NewGamecubeController();
-	gc2.RANA = .33;
-	gc3.RANA = .66;
-	gc4.RANA = 1;
-	vJoy := vJoy.NewVJoyController();
-	fmt.Printf("%d\n", scripting.KW_DDOWN);
-	for {
-		time.Sleep(500*time.Millisecond);
-		controller.SetvJoy(vJoy, gc1);
-		time.Sleep(500*time.Millisecond);
-		controller.SetvJoy(vJoy, gc2);
-		time.Sleep(500*time.Millisecond);
-		controller.SetvJoy(vJoy, gc3);
-		time.Sleep(500*time.Millisecond);
-		controller.SetvJoy(vJoy, gc4);
+	scanner := scripting.NewScanner("press x 1; unpress y 3-72");
+	for t := scanner.NextToken(); t.Type != scripting.EOF; t = scanner.NextToken() {
+		fmt.Printf("%s %d\n", t.Identifier(), t.Type);
 	}
+	fmt.Println(vJoy.GetSerialNumberString());
 }

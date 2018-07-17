@@ -1,7 +1,12 @@
 package scripting
 
+import (
+	"strconv"
+)
+
 type Token struct {
 	Type Type;
+	s string;
 }
 
 type Type int;
@@ -39,3 +44,15 @@ const (
 	KW_DDOWN;
 	EOF;
 )
+
+func (t Token) Identifier() string {
+	return t.s;
+}
+
+func (t Token) Integer() (int, error) {
+	return strconv.Atoi(t.s);
+}
+
+func (t Token) Float() (float64, error) {
+	return strconv.ParseFloat(t.s, 64);
+}
