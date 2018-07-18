@@ -4,7 +4,8 @@ import (
 	"irc"
 	"fmt"
 	"scripting"
-	"controller/vJoy"
+	"controller"
+	"scripting/token"
 )
 
 func smain() {
@@ -29,9 +30,19 @@ func smain() {
 }
 
 func main() {
-	scanner := scripting.NewScanner("press x 1; unpress y 3-72");
-	for t := scanner.NextToken(); t.Type != scripting.EOF; t = scanner.NextToken() {
-		fmt.Printf("%s %d\n", t.Identifier(), t.Type);
+	scanner := scripting.NewScanner("press x 1; unpress y 3-12,15,17-19,42-90; stick left 3-10");
+	parser := scripting.NewParser(scanner);
+	for _,c := range parser.Parse().Commands {
+		if c == nil {
+			fmt.Println("Fuck it's nil!");
+			continue;
+		}
+		c.Execute(make([]controller.GamecubeController,60));
 	}
-	fmt.Println(vJoy.GetSerialNumberString());
+	for t := scanner.NextToken(); t.Type() != token.EOF; t = scanner.NextToken() {
+		fmt.Printf("%s %d\n", t.Identifier(), t.Type());
+	}
+	t := token.New(token.FLOATLITERAL, "1");
+	val,_ := t.Float();
+	fmt.Printf("%f", val);
 }

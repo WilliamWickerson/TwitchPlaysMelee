@@ -1,17 +1,17 @@
 package scripting
 
 import (
+	"scripting/token"
 	"fmt"
 	"strings"
 )
 
 type Scanner interface {
-	NextToken() Token;
+	NextToken() token.Token;
 }
 
 type scanner struct {
-	Scanner;
-	tokens []Token;
+	tokens []token.Token;
 	nextIndex int;
 }
 
@@ -23,12 +23,10 @@ func NewScanner(s string) Scanner {
 	return scanner;
 }
 
-func (s *scanner) NextToken() Token {
+func (s *scanner) NextToken() token.Token {
 	s.nextIndex++;
 	if (s.nextIndex >= len(s.tokens)) {
-		return Token{
-			Type : EOF,
-		}
+		return token.New(token.EOF, "");
 	} else {
 		return s.tokens[s.nextIndex];
 	}
@@ -47,36 +45,36 @@ const (
 
 var (
     //Create a map for the keywords to prevent a giant switch statement
-	keywordMap = map[string]Type {
-		"press" : KW_PRESS,
-		"unpress" : KW_UNPRESS,
-		"stick" : KW_STICK,
-		"cstick" : KW_CSTICK,
-		"center" : KW_CENTER,
-		"left" : KW_LEFT,
-		"right" : KW_RIGHT,
-		"up" : KW_UP,
-		"down" : KW_DOWN,
-		"tilt" : KW_TILT,
-		"a" : KW_A,
-		"b" : KW_B,
-		"x" : KW_X,
-		"y" : KW_Y,
-		"z" : KW_Z,
-		"l" : KW_L,
-		"r" : KW_R,
-		"start" : KW_START,
-		"dleft" : KW_DLEFT,
-		"dright" : KW_DRIGHT,
-		"dup" : KW_DUP,
-		"ddown" : KW_DDOWN,
+	keywordMap = map[string]token.Type {
+		"press" : token.KW_PRESS,
+		"unpress" : token.KW_UNPRESS,
+		"stick" : token.KW_STICK,
+		"cstick" : token.KW_CSTICK,
+		"center" : token.KW_CENTER,
+		"left" : token.KW_LEFT,
+		"right" : token.KW_RIGHT,
+		"up" : token.KW_UP,
+		"down" : token.KW_DOWN,
+		"tilt" : token.KW_TILT,
+		"a" : token.KW_A,
+		"b" : token.KW_B,
+		"x" : token.KW_X,
+		"y" : token.KW_Y,
+		"z" : token.KW_Z,
+		"l" : token.KW_L,
+		"r" : token.KW_R,
+		"start" : token.KW_START,
+		"dleft" : token.KW_DLEFT,
+		"dright" : token.KW_DRIGHT,
+		"dup" : token.KW_DUP,
+		"ddown" : token.KW_DDOWN,
 	}
 )
 
 func (sc *scanner) scanTokens(s string) {
 	//Convert to lowercase and add EOF character to make parsing simpler by ensuring NONE state by the end
 	s = strings.ToLower(s + string(byte(32)));
-	sc.tokens = make([]Token, 0);
+	sc.tokens = make([]token.Token, 0);
 	//Keep track of current state and start of current token
 	var currState state = none;
 	var currStart int;
@@ -102,19 +100,19 @@ func (sc *scanner) scanTokens(s string) {
 					currState = float;
 					break;
 				case '(':
-					sc.tokens = append(sc.tokens, Token{OPENPAREN, s[currStart:pos+1]});
+					sc.tokens = append(sc.tokens, token.New(token.OPENPAREN, s[currStart:pos+1]));
 					break;
 				case ')':
-					sc.tokens = append(sc.tokens, Token{CLOSEPAREN, s[currStart:pos+1]});
+					sc.tokens = append(sc.tokens, token.New(token.CLOSEPAREN, s[currStart:pos+1]));
 					break;
 				case '-':
-					sc.tokens = append(sc.tokens, Token{HYPHEN, s[currStart:pos+1]});
+					sc.tokens = append(sc.tokens, token.New(token.HYPHEN, s[currStart:pos+1]));
 					break;
 				case ',':
-					sc.tokens = append(sc.tokens, Token{COMMA, s[currStart:pos+1]});
+					sc.tokens = append(sc.tokens, token.New(token.COMMA, s[currStart:pos+1]));
 					break;
 				case ';':
-					sc.tokens = append(sc.tokens, Token{SEMICOLON, s[currStart:pos+1]});
+					sc.tokens = append(sc.tokens, token.New(token.SEMICOLON, s[currStart:pos+1]));
 					break;
 			}
 		} else if (currState == identifier) {
@@ -122,10 +120,10 @@ func (sc *scanner) scanTokens(s string) {
 				//Check the keywordMap to see if the identifier is instead a keyword
 				keyType, exists := keywordMap[s[currStart:pos]];
 				if exists {
-					sc.tokens = append(sc.tokens, Token{keyType, s[currStart:pos]});
+					sc.tokens = append(sc.tokens, token.New(keyType, s[currStart:pos]));
 				//If it's not then use default IDENTIFIER otherwise use the KW_* type
 				} else {
-					sc.tokens = append(sc.tokens, Token{IDENTIFIER, s[currStart:pos]});
+					sc.tokens = append(sc.tokens, token.New(token.IDENTIFIER, s[currStart:pos]));
 				}
 				currState = none;
 				continue;
@@ -135,7 +133,7 @@ func (sc *scanner) scanTokens(s string) {
 			if ch == '.' {
 				currState = float;
 			} else {
-				sc.tokens = append(sc.tokens, Token{INTLITERAL, s[currStart:pos]});
+				sc.tokens = append(sc.tokens, token.New(token.INTLITERAL, s[currStart:pos]));
 				currState = none;
 				continue;
 			}
@@ -145,21 +143,20 @@ func (sc *scanner) scanTokens(s string) {
 				currState = float;
 			//Otherwise if it doesn't become a float and not still int, token's over
 			} else if !(ch >= '0' && ch <= '9') {
-				sc.tokens = append(sc.tokens, Token{INTLITERAL, s[currStart:pos]});
+				sc.tokens = append(sc.tokens, token.New(token.INTLITERAL, s[currStart:pos]));
 				currState = none;
 				continue;
 			}
 		} else if (currState == float) {
 			//Floats can only continue expanding the decimal so when decimal stops add token
 			if !(ch >= '0' && ch <= '9') {
-				sc.tokens = append(sc.tokens, Token{FLOATLITERAL, s[currStart:pos]});
+				sc.tokens = append(sc.tokens, token.New(token.FLOATLITERAL, s[currStart:pos]));
 				currState = none;
 				continue;
 			}
 		} else {
 			fmt.Println("Error, scanner entered undefined state!");
 		}
-		fmt.Printf("%d %c %d\n", pos, ch, currState);
 		pos++;
 	}
 }

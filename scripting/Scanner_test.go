@@ -14,6 +14,9 @@ func TestKeywords(t *testing.T) {
 	}
 }
 
+/*
+Tests for identifiers with various seperators including hyphenated words
+*/
 func TestIdentifier(t *testing.T) {
 	sc := NewScanner("these;are.some-identifiers");
 	if token := sc.NextToken(); token.Type != IDENTIFIER {
@@ -35,6 +38,9 @@ func TestIdentifier(t *testing.T) {
 	}
 }
 
+/*
+Tests the single character tokens
+*/
 func TestCharacters(t *testing.T) {
 	sc := NewScanner(";-(),");
 	if token := sc.NextToken(); token.Type != SEMICOLON {
@@ -54,6 +60,9 @@ func TestCharacters(t *testing.T) {
 	}
 }
 
+/*
+Tests integer literal tokens
+*/
 func TestIntegers(t *testing.T) {
 	sc := NewScanner("123 0 0123456789");
 	if token := sc.NextToken(); token.Type != INTLITERAL {
@@ -75,5 +84,32 @@ func TestIntegers(t *testing.T) {
 		t.Errorf("Error, expected token type: %d, but got: %d", INTLITERAL, token.Type);
 	} else if val,err := token.Integer(); err != nil || val != 123456789 {
 		t.Errorf("Error, expected int value: %d, but got: %d", 123456789, val);
+	}
+}
+
+/*
+Tests float literal tokens
+*/
+func TestFloat(t *testing.T) {
+	sc := NewScanner("1..23 45 0.6789");
+	if token := sc.NextToken(); token.Type != FLOATLITERAL {
+		t.Errorf("Error, expected token type: %d, but got: %d", FLOATLITERAL, token.Type);
+	} else if val,err := token.Float(); err != nil || val != 1 {
+		t.Errorf("Error, expected int value: %f, but got: %f", 1.0, val);
+	}
+	if token := sc.NextToken(); token.Type != FLOATLITERAL {
+		t.Errorf("Error, expected token type: %d, but got: %d", FLOATLITERAL, token.Type);
+	} else if val,err := token.Float(); err != nil || val != .23 {
+		t.Errorf("Error, expected int value: %f, but got: %f", .23, val);
+	}
+	if token := sc.NextToken(); token.Type !=INTLITERAL {
+		t.Errorf("Error, expected token type: %d, but got: %d", INTLITERAL, token.Type);
+	} else if val,err := token.Integer(); err != nil || val != 45 {
+		t.Errorf("Error, expected int value: %d, but got: %d", 45, val);
+	}
+	if token := sc.NextToken(); token.Type != FLOATLITERAL {
+		t.Errorf("Error, expected token type: %d, but got: %d", FLOATLITERAL, token.Type);
+	} else if val,err := token.Float(); err != nil || val != .6789 {
+		t.Errorf("Error, expected int value: %f, but got: %f", .6789, val);
 	}
 }

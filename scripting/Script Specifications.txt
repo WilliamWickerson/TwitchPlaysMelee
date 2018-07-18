@@ -20,7 +20,7 @@ openParen := (
 closeParen := )
 
 
-Script := Command (semicolon Command)* (semicolon | ε)
+Script := Command (semicolon (Command | ε))* (semicolon | ε)
 Command := ButtonCommand | StickCommand | MacroCommand
 ButtonCommand := unpress Button Duration | press ButtonMinusLR Duration | press ButtonLR (float-literal | ε) Duration
 Button := ButtonMinusLR | ButtonLR

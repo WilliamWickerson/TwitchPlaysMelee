@@ -1,12 +1,23 @@
-package scripting
+package token
 
 import (
 	"strconv"
 )
 
-type Token struct {
-	Type Type;
+type Token interface {
+	Type() Type;
+	Identifier() string;
+	Integer() (int, error);
+	Float() (float64, error);
+}
+
+type token struct {
+	t Type;
 	s string;
+}
+
+func New(t Type, s string) Token {
+	return token{t, s};
 }
 
 type Type int;
@@ -45,14 +56,18 @@ const (
 	EOF;
 )
 
-func (t Token) Identifier() string {
+func (t token) Type() Type {
+	return t.t;
+}
+
+func (t token) Identifier() string {
 	return t.s;
 }
 
-func (t Token) Integer() (int, error) {
+func (t token) Integer() (int, error) {
 	return strconv.Atoi(t.s);
 }
 
-func (t Token) Float() (float64, error) {
+func (t token) Float() (float64, error) {
 	return strconv.ParseFloat(t.s, 64);
 }
