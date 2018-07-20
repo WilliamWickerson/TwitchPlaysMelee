@@ -11,25 +11,6 @@ type GamecubeController struct {
 	STICKX, STICKY, CX, CY, LANA, RANA float64;
 }
 
-//Floats default to 0 so having the sticks default to center is desired
-func NewGamecubeController() GamecubeController {
-	return GamecubeController{
-		STICKX : .5,
-		STICKY : .5,
-		CX : .5,
-		CY : .5,
-	}
-}
-
-//Making a slice with a default value is too hard for go I guess
-func NewGCSlice(size int) []GamecubeController {
-	gcSlice := make([]GamecubeController, 0, size);
-	for i := 0; i < size; i++ {
-		gcSlice = append(gcSlice, NewGamecubeController());
-	}
-	return gcSlice;
-}
-
 const (
 	//Constants to map the 12 gamecube buttons
 	A = 1;
@@ -68,10 +49,10 @@ func SetvJoy(c vJoy.VJoyController, gc GamecubeController) {
 	c.SetButton(gc.DRIGHT, DRIGHT);
 	c.SetButton(gc.DDOWN, DDOWN);
 	//Set the 6 axes based on the Gamecube Controller State
-	c.SetAxis(int(gc.STICKX*32768), STICKX);
-	c.SetAxis(int(gc.STICKY*32768), STICKY);
-	c.SetAxis(int(gc.CX*32768), CX);
-	c.SetAxis(int(gc.CY*32768), CY);
+	c.SetAxis(int(gc.STICKX*16384 + 16384), STICKX);
+	c.SetAxis(int(gc.STICKY*16384 + 16384), STICKY);
+	c.SetAxis(int(gc.CX*16384 + 16384), CX);
+	c.SetAxis(int(gc.CY*16384 + 16384), CY);
 	c.SetAxis(int(gc.LANA*16384 + 16384), LANA);
 	c.SetAxis(int(gc.RANA*16384 + 16384), RANA);
 }
