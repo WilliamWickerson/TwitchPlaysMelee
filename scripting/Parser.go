@@ -68,18 +68,21 @@ var (
 	firstMacroInput = append([]token.Type{token.INTLITERAL, token.FLOATLITERAL}, namedDirections...);
 )
 
+/* Script := Command (semicolon (Command | ε))* (semicolon | ε) */
 func (p *parser) script() AST.Script {
 	commands := make([]AST.Command,0);
 	commands = append(commands, p.command());
 	for p.currToken.Type() == token.SEMICOLON {
 		p.match(token.SEMICOLON);
-		if contains(firstCommand, p.currToken.Type()) {
+		//The only reason for there not to be a command is we've reached end tokens
+		if p.currToken.Type() != token.EOF {
 			commands = append(commands, p.command());
 		}
 	}
 	return AST.Script{commands};
 }
 
+/* Command := ButtonCommand | StickCommand | MacroCommand */
 func (p *parser) command() AST.Command {
 	if contains(firstButtonCommand, p.currToken.Type()) {
 		return p.buttonCommand();
@@ -92,6 +95,8 @@ func (p *parser) command() AST.Command {
 	}
 }
 
+/* ButtonCommand := unpress Button Duration | press ButtonMinusLR Duration |
+                    press ButtonLR (float-literal | ε) Duration */
 func (p *parser) buttonCommand() AST.Command {
 	command := p.currToken.Type();
 	p.matchArray(firstButtonCommand);
@@ -118,6 +123,7 @@ func (p *parser) buttonCommand() AST.Command {
 	return nil;
 }
 
+/* StickCommand := (stick | cstick) Direction Duration */
 func (p *parser) stickCommand() AST.Command {
 	stick := p.currToken.Type();
 	p.matchArray(firstStickCommand);
@@ -126,6 +132,7 @@ func (p *parser) stickCommand() AST.Command {
 	return AST.NewStickCommand(stick, dir, dur);
 }
 
+/* MacroCommand := macro-identifier (int-literal | float-literal | namedDirection)* (ε | int-literal) */
 func (p *parser) macroCommand() AST.Command {
 	p.match(token.IDENTIFIER);
 	for contains(firstMacroInput, p.currToken.Type()) {
@@ -134,6 +141,7 @@ func (p *parser) macroCommand() AST.Command {
 	return nil;
 }
 
+/* Duration := ε | Frames (comma Frames)* */
 func (p *parser) duration() AST.Duration {
 	frames := make([]AST.Frames, 0);
     frames = append(frames, p.frames());
@@ -144,7 +152,12 @@ func (p *parser) duration() AST.Duration {
 	return AST.NewDuration(frames);
 }
 
+/* Frames := int-literal (ε | hyphen int-literal) */
 func (p *parser) frames() AST.Frames {
+	//Duration can equal ε, but it's simpler to take care of that case here
+	if (p.currToken.Type() == token.SEMICOLON || p.currToken.Type() == token.EOF) {
+		return AST.Frames{1,1};
+	}
 	start,_ := p.currToken.Integer();
 	p.match(token.INTLITERAL);
 	if (p.currToken.Type() == token.HYPHEN) {
@@ -157,6 +170,8 @@ func (p *parser) frames() AST.Frames {
 	}
 }
 
+/* Direction := (tilt | ε) ((openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen)
+             | (NamedDirection NamedDirection*)) */
 func (p *parser) direction() AST.Direction {
 	tilt := false;
 	if p.currToken.Type() == token.KW_TILT {
@@ -176,8 +191,7 @@ func (p *parser) direction() AST.Direction {
 		directions := make([]token.Type, 0);
 		directions = append(directions, p.currToken.Type());
 		p.matchArray(namedDirections);
-		for p.currToken.Type() == token.HYPHEN {
-			p.match(token.HYPHEN);
+		for contains(namedDirections, p.currToken.Type()) {
 			directions = append(directions, p.currToken.Type());
 			p.matchArray(namedDirections);
 		}

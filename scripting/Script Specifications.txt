@@ -26,11 +26,11 @@ ButtonCommand := unpress Button Duration | press ButtonMinusLR Duration | press 
 Button := ButtonMinusLR | ButtonLR
 ButtonMinusLR := A | B | X | Y | Z | START | DLEFT | DRIGHT | DUP | DDOWN
 ButtonLR := L | R
-Duration := Frames (comma Frames)*
+Duration := ε | Frames (comma Frames)*
 Frames := int-literal (ε | hyphen int-literal)
 StickCommand := (stick | cstick) Direction Duration
 Direction := (tilt | ε) ((openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen)
-             | (NamedDirection (hyphen NamedDirection)*))
+             | (NamedDirection NamedDirection*))
 NamedDirection := center | left | right | up | down | tilt
 MacroCommand := macro-identifier (int-literal | float-literal | namedDirection)* (ε | int-literal)
 

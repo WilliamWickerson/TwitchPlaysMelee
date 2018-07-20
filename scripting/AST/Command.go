@@ -75,14 +75,20 @@ func NewSliderCommand(command token.Type, button token.Type, value float64, dura
 
 func (sc sliderCommand) Execute(gcArray []controller.GamecubeController) {
 	fmt.Println("Slider Command!");
-	/*
-	switch (sc.button) {
-		case token.KW_L:
-			gcArray[frame].B = setting;
-		case token.KW_R:
-			gcArray[frame].B = setting;
+	for _,frame := range sc.duration.Frames() {
+		//If the value to set is greater than or equal to 1, set digital press
+		digPress := sc.value >= 1;
+		switch (sc.button) {
+			case token.KW_L:
+				gcArray[frame].L = digPress;
+				gcArray[frame].LANA = sc.value;
+				break;
+			case token.KW_R:
+				gcArray[frame].R = digPress;
+				gcArray[frame].RANA = sc.value;
+				break;
+		}
 	}
-	*/
 }
 
 type stickCommand struct {
@@ -97,6 +103,19 @@ func NewStickCommand(stick token.Type, direction Direction, duration Duration) C
 
 func (sc stickCommand) Execute(gcArray []controller.GamecubeController) {
 	fmt.Println("Stick Command!");
+	for _,frame := range sc.duration.Frames() {
+		x,y := sc.direction.Components();
+		switch (sc.stick) {
+			case token.KW_STICK:
+				gcArray[frame].STICKX = x;
+				gcArray[frame].STICKY = y;
+				break;
+			case token.KW_CSTICK:
+				gcArray[frame].CX = x;
+				gcArray[frame].CY = y;
+				break;
+		}
+	}
 }
 
 type macroCommand struct {

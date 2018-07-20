@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"scripting"
 	"controller"
+	"controller/vJoy"
 	"scripting/token"
 )
 
@@ -30,19 +31,20 @@ func smain() {
 }
 
 func main() {
-	scanner := scripting.NewScanner("press x 1; unpress y 3-12,15,17-19,42-90; stick left 3-10");
+	scanner := scripting.NewScanner("press x 1; press l 1-2; press r .5; stick tilt (1.5,1) 1-10");
 	parser := scripting.NewParser(scanner);
+	gcSlice := controller.NewGCSlice(60);
 	for _,c := range parser.Parse().Commands {
 		if c == nil {
 			fmt.Println("Fuck it's nil!");
 			continue;
 		}
-		c.Execute(make([]controller.GamecubeController,60));
+		c.Execute(gcSlice);
+		controller.PrintGC(gcSlice[0]);
 	}
 	for t := scanner.NextToken(); t.Type() != token.EOF; t = scanner.NextToken() {
 		fmt.Printf("%s %d\n", t.Identifier(), t.Type());
 	}
-	t := token.New(token.FLOATLITERAL, "1");
-	val,_ := t.Float();
-	fmt.Printf("%f", val);
+	vJoyC := vJoy.NewVJoyController();
+	controller.SetvJoy(vJoyC, gcSlice[0]);
 }

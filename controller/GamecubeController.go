@@ -2,6 +2,7 @@ package controller
 
 import (
 	"controller/vJoy"
+	"fmt"
 )
 
 type GamecubeController struct {
@@ -17,9 +18,16 @@ func NewGamecubeController() GamecubeController {
 		STICKY : .5,
 		CX : .5,
 		CY : .5,
-		LANA : .5,
-		RANA : .5,
 	}
+}
+
+//Making a slice with a default value is too hard for go I guess
+func NewGCSlice(size int) []GamecubeController {
+	gcSlice := make([]GamecubeController, 0, size);
+	for i := 0; i < size; i++ {
+		gcSlice = append(gcSlice, NewGamecubeController());
+	}
+	return gcSlice;
 }
 
 const (
@@ -66,4 +74,15 @@ func SetvJoy(c vJoy.VJoyController, gc GamecubeController) {
 	c.SetAxis(int(gc.CY*32768), CY);
 	c.SetAxis(int(gc.LANA*16384 + 16384), LANA);
 	c.SetAxis(int(gc.RANA*16384 + 16384), RANA);
+}
+
+func PrintGC(gc GamecubeController) {
+	//IDE gives tab a length of 4 characters while cmd gives it a length of 8
+	//since the latter is preferred, the spaces are used to force that behavior
+	fmt.Printf("A    \tB    \tX    \tY    \tZ    \tSTART\tDLEFT\tDRIGHT\tDUP  \tDDOWN\n");
+	fmt.Printf("%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\t%t\n", gc.A, gc.B, gc.X, gc.Y, gc.Z, gc.START, gc.DLEFT, gc.DRIGHT, gc.DUP, gc.DDOWN);
+	fmt.Printf("L: %t %f\n", gc.L, gc.LANA);
+	fmt.Printf("R: %t %f\n", gc.R, gc.RANA);
+	fmt.Printf("Stick: (%f, %f)\n", gc.STICKX, gc.STICKY);
+	fmt.Printf("CStick: (%f, %f)\n", gc.CX, gc.CY);
 }
