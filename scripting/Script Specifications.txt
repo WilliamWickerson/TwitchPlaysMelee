@@ -29,8 +29,9 @@ ButtonLR := L | R
 Duration := ε | Frames (comma Frames)*
 Frames := int-literal (ε | hyphen int-literal)
 StickCommand := (stick | cstick) Direction Duration
-Direction := (tilt | ε) ((openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen)
-             | (NamedDirection NamedDirection*))
+Direction := (tilt | ε) (PairDirection | NamedDirections)
+PairDirection := (openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen)
+NamedDirections := NamedDirection NamedDirection*
 NamedDirection := center | left | right | up | down | tilt
 MacroCommand := macro-identifier (int-literal | float-literal | namedDirection)* (ε | int-literal)
 

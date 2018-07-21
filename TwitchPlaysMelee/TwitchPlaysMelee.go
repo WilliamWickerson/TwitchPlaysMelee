@@ -31,7 +31,7 @@ func smain() {
 }
 
 func main() {
-	scanner := scripting.NewScanner("press x 1; press r .6 1-2; press l 1; stick tilt (1.5,1) 1-10; cstick down left 1");
+	scanner := scripting.NewScanner("press x 1; press r .6 1-2; press 1; stick tilt (1.5,1) 1-10; cstick down left 1");
 	parser := scripting.NewParser(scanner);
 	gcSlice := make([]controller.GamecubeController, 60);
 	for _,c := range parser.Parse().Commands {
@@ -47,6 +47,4 @@ func main() {
 	}
 	vJoyC := vJoy.NewVJoyController();
 	controller.SetvJoy(vJoyC, gcSlice[0]);
-	vJoyC.SetAxis(20000, vJoy.Sl0);
-	vJoyC.SetButton(true, controller.L);
 }

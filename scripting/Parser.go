@@ -4,7 +4,6 @@ import (
 	"scripting/token"
 	"scripting/AST"
 	"errors"
-	"fmt"
 )
 
 type Parser interface {
@@ -34,10 +33,13 @@ func contains(types []token.Type, ty token.Type) bool {
 	return false;
 }
 
+func (p *parser) consume() {
+	p.currToken = p.scanner.NextToken();
+}
+
 func (p *parser) match(t token.Type) error {
-	fmt.Printf("%d\n", p.currToken.Type());
-	defer func(){p.currToken = p.scanner.NextToken()}();;
 	if p.currToken.Type() == t {
+		p.consume();
 		return nil;
 	} else {
 		return errors.New("Error, expected token type: " + string(t) + ", but got: " + string(p.currToken.Type()));
@@ -45,9 +47,8 @@ func (p *parser) match(t token.Type) error {
 }
 
 func (p *parser) matchArray(types []token.Type) error {
-	fmt.Printf("%d\n", p.currToken.Type());
-	defer func(){p.currToken = p.scanner.NextToken()}();;
 	if contains(types, p.currToken.Type()) {
+		p.consume();
 		return nil;
 	} else {
 		return errors.New("Error, expected token type: " + string(p.currToken.Type()) + ", not in list");
@@ -71,19 +72,33 @@ var (
 /* Script := Command (semicolon (Command | ε))* (semicolon | ε) */
 func (p *parser) script() AST.Script {
 	commands := make([]AST.Command,0);
-	commands = append(commands, p.command());
+	//Parse first command and add if there's no error
+	if command, err := p.command(); err == nil {
+		commands = append(commands, command);
+	//If there is an error then consume tokens until hitting a semicolon signifying next command
+	} else {
+		for p.currToken.Type() != token.SEMICOLON && p.currToken.Type() != token.EOF {
+			p.consume();
+		}
+	}
+	//while the current token type is semicolon, keep parsing commands
 	for p.currToken.Type() == token.SEMICOLON {
-		p.match(token.SEMICOLON);
-		//The only reason for there not to be a command is we've reached end tokens
-		if p.currToken.Type() != token.EOF {
-			commands = append(commands, p.command());
+		p.consume();
+		//Same procedure as first but that wasn't preceeded by semicolon
+		if command, err := p.command(); err == nil {
+			commands = append(commands, command);
+		} else {
+			for p.currToken.Type() != token.SEMICOLON && p.currToken.Type() != token.EOF {
+				p.consume();
+			}
 		}
 	}
 	return AST.Script{commands};
 }
 
 /* Command := ButtonCommand | StickCommand | MacroCommand */
-func (p *parser) command() AST.Command {
+func (p *parser) command() (AST.Command, error) {
+	//We have an LL(1) grammar so just check the next token to see what to do
 	if contains(firstButtonCommand, p.currToken.Type()) {
 		return p.buttonCommand();
 	} else if contains(firstStickCommand, p.currToken.Type()) {
@@ -91,111 +106,181 @@ func (p *parser) command() AST.Command {
 	} else if contains(firstMacroCommand, p.currToken.Type()) {
 		return p.macroCommand();
 	} else {
-		return nil;
+		return nil, errors.New("Unrecognized command type");
 	}
 }
 
 /* ButtonCommand := unpress Button Duration | press ButtonMinusLR Duration |
                     press ButtonLR (float-literal | ε) Duration */
-func (p *parser) buttonCommand() AST.Command {
+func (p *parser) buttonCommand() (AST.Command, error) {
+	//Command should be either press or unpress
 	command := p.currToken.Type();
-	p.matchArray(firstButtonCommand);
+	if err := p.matchArray(firstButtonCommand); err != nil {
+		return nil, err;
+	}
 	but := p.currToken.Type();
+	//If the button isn't a slider then we use first type
 	if contains(buttonMinusLR, but) {
-		p.matchArray(buttonMinusLR);
-		dur := p.duration();
-		return AST.NewButtonCommand(command, but, dur);
+		p.consume();
+		dur, err := p.duration();
+		if err != nil {
+			return nil, err;
+		}
+		return AST.NewButtonCommand(command, but, dur), nil;
+	//If the button is a slider we need additional logic for the analogue value
 	} else if contains(buttonLR, but) {
-		p.matchArray(buttonLR);
+		p.consume();
 		var val float64;
+		//Value was specified so use it
 		if p.currToken.Type() == token.FLOATLITERAL {
 			val,_ = p.currToken.Float();
-			p.match(token.FLOATLITERAL);
+			p.consume();
+		//Otherwise press implies 1.0 analogue press and unpress implies 0.0 analogue press
 		} else if command == token.KW_PRESS {
 			val = 1;
 		} else if command == token.KW_UNPRESS {
 			val = 0;
 		}
-		dur := p.duration();
-		return AST.NewSliderCommand(command, but, val, dur);
+		//Try to parse duration and go from there
+		dur, err := p.duration();
+		if err != nil {
+			return nil, err;
+		}
+		return AST.NewSliderCommand(command, but, val, dur), nil;
 	}
 	//How did we get here?
-	return nil;
+	return nil, errors.New("Unrecognized slider command type");
 }
 
 /* StickCommand := (stick | cstick) Direction Duration */
-func (p *parser) stickCommand() AST.Command {
+func (p *parser) stickCommand() (AST.Command, error) {
+	//Stick should be either 'stick' or 'cstick'
 	stick := p.currToken.Type();
-	p.matchArray(firstStickCommand);
-	dir := p.direction();
-	dur := p.duration();
-	return AST.NewStickCommand(stick, dir, dur);
+	if err := p.matchArray(firstStickCommand); err != nil {
+		return nil, err;
+	}
+	//Parse the direction looking for errors
+	dir, err := p.direction();
+	if err != nil {
+		return nil, err;
+	}
+	//Parse the duration looking for errors
+	dur, err := p.duration();
+	if err != nil {
+		return nil, err;
+	}
+	return AST.NewStickCommand(stick, dir, dur), nil;
 }
 
 /* MacroCommand := macro-identifier (int-literal | float-literal | namedDirection)* (ε | int-literal) */
-func (p *parser) macroCommand() AST.Command {
+func (p *parser) macroCommand() (AST.Command, error) {
 	p.match(token.IDENTIFIER);
 	for contains(firstMacroInput, p.currToken.Type()) {
 		//do stuff with input
 	}
-	return nil;
+	return nil, errors.New("Unrecognized macro command type");
 }
 
 /* Duration := ε | Frames (comma Frames)* */
-func (p *parser) duration() AST.Duration {
+func (p *parser) duration() (AST.Duration, error) {
+	//Make an array to hold the Frames structs
 	frames := make([]AST.Frames, 0);
-    frames = append(frames, p.frames());
-	for p.currToken.Type() == token.COMMA {
-		p.match(token.COMMA);
-		frames = append(frames, p.frames());
+	//Must contain at least one so parse the first
+	frame, err := p.frames();
+	if err != nil {
+		return nil, err;
 	}
-	return AST.NewDuration(frames);
+    frames = append(frames, frame);
+    //Commas signify there being more so keeping parsing Frames
+	for p.currToken.Type() == token.COMMA {
+		p.consume();
+		frame, err := p.frames();
+		if err != nil {
+			return nil, err;
+		}
+		frames = append(frames, frame);
+	}
+	return AST.NewDuration(frames), nil;
 }
 
 /* Frames := int-literal (ε | hyphen int-literal) */
-func (p *parser) frames() AST.Frames {
+func (p *parser) frames() (AST.Frames, error) {
 	//Duration can equal ε, but it's simpler to take care of that case here
 	if (p.currToken.Type() == token.SEMICOLON || p.currToken.Type() == token.EOF) {
-		return AST.Frames{1,1};
+		return AST.Frames{1,1}, nil;
 	}
+	//Make sure frames starts with an integer
 	start,_ := p.currToken.Integer();
-	p.match(token.INTLITERAL);
+	if err := p.match(token.INTLITERAL); err != nil {
+		return AST.Frames{}, err;
+	}
+	//If there is a hyphen then it expresses a range so parse that
 	if (p.currToken.Type() == token.HYPHEN) {
-		p.match(token.HYPHEN);
+		p.consume();
 		end,_ := p.currToken.Integer();
-		p.match(token.INTLITERAL);
-		return AST.Frames{start, end};
+		if err := p.match(token.INTLITERAL); err != nil {
+			return AST.Frames{}, err;
+		}
+		return AST.Frames{start, end}, nil;
+	//Otherwise just return simple 1 frame range
 	} else {
-		return AST.Frames{start, start};
+		return AST.Frames{start, start}, nil;
 	}
 }
 
-/* Direction := (tilt | ε) ((openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen)
-             | (NamedDirection NamedDirection*)) */
-func (p *parser) direction() AST.Direction {
+/* Direction := (tilt | ε) (PairDirection | NamedDirections) */
+func (p *parser) direction() (AST.Direction, error) {
+	//Tilt is a modifier at the start, check if it exists
 	tilt := false;
 	if p.currToken.Type() == token.KW_TILT {
 		p.match(token.KW_TILT)
 		tilt = true;
 	}
+	//If next token is first of PairDirection parse that
 	if p.currToken.Type() == token.OPENPAREN {
-		p.match(token.OPENPAREN);
-		x,_ := p.currToken.Float();
-		p.matchArray(inputDirection);
-		p.match(token.COMMA);
-		y,_ := p.currToken.Float();
-		p.matchArray(inputDirection);
-		p.match(token.CLOSEPAREN);
-		return AST.NewDirectionPair(x, y, tilt);
+		return p.pairDirection(tilt);
+	//Otherwise if it's first of NameDirections parse that isntead
 	} else if contains(namedDirections, p.currToken.Type()) {
-		directions := make([]token.Type, 0);
-		directions = append(directions, p.currToken.Type());
-		p.matchArray(namedDirections);
-		for contains(namedDirections, p.currToken.Type()) {
-			directions = append(directions, p.currToken.Type());
-			p.matchArray(namedDirections);
-		}
-		return AST.NewDirection(directions, tilt);
+		return p.namedDirections(tilt);
 	}
-	return nil;
+	return nil, errors.New("Unrecognized direction type");
+}
+
+/* PairDirection := (openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen) */
+func (p *parser) pairDirection(tilt bool) (AST.Direction, error) {
+	if err := p.match(token.OPENPAREN); err != nil {
+		return nil, err;
+	}
+	x,_ := p.currToken.Float();
+	if err := p.matchArray(inputDirection); err != nil {
+		return nil, err;
+	}
+	if err := p.match(token.COMMA); err != nil {
+		return nil, err;
+	}
+	y,_ := p.currToken.Float();
+	if err := p.matchArray(inputDirection); err != nil {
+		return nil, err;
+	}
+	if err := p.match(token.CLOSEPAREN); err != nil {
+		return nil, err;
+	}
+	return AST.NewDirectionPair(x, y, tilt), nil;
+}
+
+/* NamedDirections := NamedDirection NamedDirection* */
+func (p *parser) namedDirections(tilt bool) (AST.Direction, error) {
+	//Create a slice for the directions
+	directions := make([]token.Type, 0);
+	//There must be at least one direction so much that
+	directions = append(directions, p.currToken.Type());
+	if err := p.matchArray(namedDirections); err != nil {
+		return nil, err;
+	}
+	//While there are more directions, keep appending them
+	for contains(namedDirections, p.currToken.Type()) {
+		directions = append(directions, p.currToken.Type());
+		p.consume();
+	}
+	return AST.NewDirection(directions, tilt), nil;
 }
