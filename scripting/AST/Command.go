@@ -121,3 +121,11 @@ func (sc stickCommand) Execute(gcArray []controller.GamecubeController) {
 type macroCommand struct {
 	Command;
 }
+
+func NewMacroCommand(identifier token.Token, inputs []token.Token) Command {
+	return nil;
+}
+
+func (mc macroCommand) Execute(gcArray []controller.GamecubeController) {
+	fmt.Println("Macro Command!");
+}

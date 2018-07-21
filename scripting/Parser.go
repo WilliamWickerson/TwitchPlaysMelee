@@ -7,7 +7,7 @@ import (
 )
 
 type Parser interface {
-	Parse() AST.Script;
+	Parse() []AST.Command;
 }
 
 type parser struct {
@@ -19,7 +19,7 @@ func NewParser(s Scanner) Parser {
 	return &parser{scanner : s};
 }
 
-func (p *parser) Parse() AST.Script {
+func (p *parser) Parse() []AST.Command {
 	p.currToken = p.scanner.NextToken();
 	return p.script();
 }
@@ -70,7 +70,7 @@ var (
 )
 
 /* Script := Command (semicolon (Command | ε))* (semicolon | ε) */
-func (p *parser) script() AST.Script {
+func (p *parser) script() []AST.Command {
 	commands := make([]AST.Command,0);
 	//Parse first command and add if there's no error
 	if command, err := p.command(); err == nil {
@@ -93,7 +93,7 @@ func (p *parser) script() AST.Script {
 			}
 		}
 	}
-	return AST.Script{commands};
+	return commands;
 }
 
 /* Command := ButtonCommand | StickCommand | MacroCommand */
