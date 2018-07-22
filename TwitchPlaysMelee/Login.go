@@ -23,7 +23,7 @@ func GetLogin() Login {
 	//Open the login file, if it can't be opened then exit
 	loginFile, err := os.Open("login.json");
 	if err != nil {
-		fmt.Println(err);
+		fmt.Println(err.Error());
 		os.Exit(1);
 	}
 	//Make sure the file gets closed

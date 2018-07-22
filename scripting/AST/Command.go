@@ -3,11 +3,11 @@ package AST
 import (
 	"scripting/token"
 	"controller"
-	"fmt"
 )
 
 type Command interface {
 	Execute(gcArray []controller.GamecubeController);
+	executeDelay(gcArray []controller.GamecubeController, delay int);
 }
 
 type buttonCommand struct {
@@ -21,8 +21,15 @@ func NewButtonCommand(command token.Type, button token.Type, duration Duration) 
 }
 
 func (bc buttonCommand) Execute(gcArray []controller.GamecubeController) {
-	fmt.Println("Button Command!");
-	for _,frame := range bc.duration.Frames() {
+	bc.executeDelay(gcArray, 0);
+}
+
+func (bc buttonCommand) executeDelay(gcArray []controller.GamecubeController, delay int) {
+	for _,i := range bc.duration.Frames() {
+		frame := i + delay;
+		if frame < 0 || frame >= MAXFRAMEWINDOW {
+			continue;
+		}
 		setting := true;
 		if (bc.command == token.KW_UNPRESS) {
 			setting = false;
@@ -74,8 +81,15 @@ func NewSliderCommand(command token.Type, button token.Type, value float64, dura
 }
 
 func (sc sliderCommand) Execute(gcArray []controller.GamecubeController) {
-	fmt.Println("Slider Command!");
-	for _,frame := range sc.duration.Frames() {
+	sc.executeDelay(gcArray, 0);
+}
+
+func (sc sliderCommand) executeDelay(gcArray []controller.GamecubeController, delay int) {
+	for _,i := range sc.duration.Frames() {
+		frame := i + delay;
+		if frame < 0 || frame >= MAXFRAMEWINDOW {
+			continue;
+		}
 		//If the value to set is greater than or equal to 1, set digital press
 		digPress := sc.value >= 1;
 		switch (sc.button) {
@@ -102,8 +116,16 @@ func NewStickCommand(stick token.Type, direction Direction, duration Duration) C
 }
 
 func (sc stickCommand) Execute(gcArray []controller.GamecubeController) {
-	fmt.Println("Stick Command!");
-	for _,frame := range sc.duration.Frames() {
+	sc.executeDelay(gcArray, 0);
+}
+
+func (sc stickCommand) executeDelay(gcArray []controller.GamecubeController, delay int) {
+	for _,i := range sc.duration.Frames() {
+		frame := i + delay;
+		if frame < 0 || frame >= MAXFRAMEWINDOW {
+			continue;
+		}
+		//Get the components of the direction and set the correct stick
 		x,y := sc.direction.Components();
 		switch (sc.stick) {
 			case token.KW_STICK:
@@ -119,13 +141,20 @@ func (sc stickCommand) Execute(gcArray []controller.GamecubeController) {
 }
 
 type macroCommand struct {
-	Command;
+	commands []Command;
+	delay int;
 }
 
-func NewMacroCommand(identifier token.Token, inputs []token.Token) Command {
-	return nil;
+func NewMacroCommand(commands []Command, delay int) Command {
+	return macroCommand{commands, delay};
 }
 
 func (mc macroCommand) Execute(gcArray []controller.GamecubeController) {
-	fmt.Println("Macro Command!");
+	mc.executeDelay(gcArray, 0);
+}
+
+func (mc macroCommand) executeDelay(gcArray[]controller.GamecubeController, delay int) {
+	for _,command := range mc.commands {
+		command.executeDelay(gcArray, mc.delay + delay);
+	}
 }

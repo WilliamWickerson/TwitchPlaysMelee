@@ -7,6 +7,7 @@ import (
 	"controller"
 	"controller/vJoy"
 	"scripting/token"
+	"scripting/AST"
 )
 
 func smain() {
@@ -31,7 +32,7 @@ func smain() {
 }
 
 func main() {
-	scanner := scripting.NewScanner("press x 1; press r .6 1-2; press 1; stick tilt (1.5,1) 1-10; cstick down left 1");
+	scanner := scripting.NewScanner("wavedash 3 left");
 	parser := scripting.NewParser(scanner);
 	gcSlice := make([]controller.GamecubeController, 60);
 	for _,c := range parser.Parse() {
@@ -41,10 +42,12 @@ func main() {
 		}
 		c.Execute(gcSlice);
 		controller.PrintGC(gcSlice[0]);
+		controller.PrintGC(gcSlice[3]);
 	}
 	for t := scanner.NextToken(); t.Type() != token.EOF; t = scanner.NextToken() {
-		fmt.Printf("%s %d\n", t.Identifier(), t.Type());
+		fmt.Printf("%s %d\n", t.Text(), t.Type());
 	}
 	vJoyC := vJoy.NewVJoyController();
 	controller.SetvJoy(vJoyC, gcSlice[0]);
+	fmt.Println(AST.GetMacro("wavedash", 2));
 }

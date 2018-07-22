@@ -1,0 +1,10 @@
+[
+  {
+    "name" : "wavedash[2]",
+    "text" : "press x; stick down #2 #1+1; press l #1+1"
+  },
+  {
+    "name" : "up-tilt",
+    "text" : "stick tilt up; press a"
+  }
+]

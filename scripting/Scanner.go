@@ -114,6 +114,9 @@ func (sc *scanner) scanTokens(s string) {
 				case ';':
 					sc.tokens = append(sc.tokens, token.New(token.SEMICOLON, s[currStart:pos+1]));
 					break;
+				case '+':
+					sc.tokens = append(sc.tokens, token.New(token.PLUS, s[currStart:pos+1]));
+					break;
 			}
 		} else if (currState == identifier) {
 			if !((ch >= 'a' && ch <= 'z') || ch == '-') {

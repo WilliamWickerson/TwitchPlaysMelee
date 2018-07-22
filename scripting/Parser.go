@@ -4,6 +4,8 @@ import (
 	"scripting/token"
 	"scripting/AST"
 	"errors"
+	"strings"
+	"strconv"
 )
 
 type Parser interface {
@@ -174,11 +176,33 @@ func (p *parser) stickCommand() (AST.Command, error) {
 
 /* MacroCommand := macro-identifier (int-literal | float-literal | namedDirection)* (ε | int-literal) */
 func (p *parser) macroCommand() (AST.Command, error) {
+	name := p.currToken.Text();
 	p.match(token.IDENTIFIER);
+	//Get the inputs to the macro
+	inputs := make([]token.Token, 0);
 	for contains(firstMacroInput, p.currToken.Type()) {
-		//do stuff with input
+		inputs = append(inputs, p.currToken);
+		p.consume();
 	}
-	return nil, errors.New("Unrecognized macro command type");
+	//The delay is ambiguous, so we need to check with and without it
+	delay := 0;
+	text := AST.GetMacro(name, len(inputs));
+	if text == "" {
+		text = AST.GetMacro(name, len(inputs) - 1);
+		if len(inputs) > 0 && inputs[len(inputs) - 1].Type() == token.INTLITERAL && text != "" {
+			delay,_ = inputs[len(inputs) - 1].Integer();
+			inputs = inputs[:len(inputs) - 1];
+		} else {
+			return nil, errors.New("Macro does not exist");
+		}
+	}
+	//Replace the #i's in the text with the corresponding input
+	for i,token := range inputs {
+		text = strings.Replace(text, "#" + strconv.Itoa(i+1), token.Text(), -1);
+	}
+	//Parse the macro for it's constituent commands and return
+	parser := NewParser(NewScanner(text));
+	return AST.NewMacroCommand(parser.Parse(), delay), nil;
 }
 
 /* Duration := ε | Frames (comma Frames)* */
@@ -203,22 +227,22 @@ func (p *parser) duration() (AST.Duration, error) {
 	return AST.NewDuration(frames), nil;
 }
 
-/* Frames := int-literal (ε | hyphen int-literal) */
+/* Frames := Expression (ε | hyphen Expression) */
 func (p *parser) frames() (AST.Frames, error) {
 	//Duration can equal ε, but it's simpler to take care of that case here
 	if (p.currToken.Type() == token.SEMICOLON || p.currToken.Type() == token.EOF) {
 		return AST.Frames{1,1}, nil;
 	}
 	//Make sure frames starts with an integer
-	start,_ := p.currToken.Integer();
-	if err := p.match(token.INTLITERAL); err != nil {
+	start, err := p.expression();
+	if err != nil {
 		return AST.Frames{}, err;
 	}
 	//If there is a hyphen then it expresses a range so parse that
 	if (p.currToken.Type() == token.HYPHEN) {
 		p.consume();
-		end,_ := p.currToken.Integer();
-		if err := p.match(token.INTLITERAL); err != nil {
+		end, err := p.expression();
+		if err != nil {
 			return AST.Frames{}, err;
 		}
 		return AST.Frames{start, end}, nil;
@@ -226,6 +250,24 @@ func (p *parser) frames() (AST.Frames, error) {
 	} else {
 		return AST.Frames{start, start}, nil;
 	}
+}
+
+/* Expression := int-literal (ε | plus int-literal) */
+func (p *parser) expression() (int, error) {
+	val,_ := p.currToken.Integer();
+	if err := p.match(token.INTLITERAL); err != nil {
+		return -1, err;
+	}
+	//The only expression is plus a number so look for that
+	if p.currToken.Type() == token.PLUS {
+		p.consume();
+		val2,_ := p.currToken.Integer();
+		if err := p.match(token.INTLITERAL); err != nil {
+			return -1, err;
+		}
+		return val + val2, nil;
+	}
+	return val, nil;
 }
 
 /* Direction := (tilt | ε) (PairDirection | NamedDirections) */
@@ -246,19 +288,33 @@ func (p *parser) direction() (AST.Direction, error) {
 	return nil, errors.New("Unrecognized direction type");
 }
 
-/* PairDirection := (openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen) */
+/* PairDirection := (openParen (ε | hyphen) (int-literal | float-literal) comma (ε | hyphen) (int-literal | float-literal) closeParen) */
 func (p *parser) pairDirection(tilt bool) (AST.Direction, error) {
 	if err := p.match(token.OPENPAREN); err != nil {
 		return nil, err;
 	}
+	//Since inputs can be negative, check whether a hyphen precedes
+	firstSign := 1.0;
+	if p.currToken.Type() == token.HYPHEN {
+		p.consume();
+		firstSign = -1.0;
+	}
 	x,_ := p.currToken.Float();
+	x = firstSign * x;
 	if err := p.matchArray(inputDirection); err != nil {
 		return nil, err;
 	}
 	if err := p.match(token.COMMA); err != nil {
 		return nil, err;
 	}
+	//Same as previous for the second int/float input
+	secondSign := 1.0;
+	if p.currToken.Type() == token.HYPHEN {
+		p.consume();
+		secondSign = -1.0;
+	}
 	y,_ := p.currToken.Float();
+	y = secondSign * y;
 	if err := p.matchArray(inputDirection); err != nil {
 		return nil, err;
 	}

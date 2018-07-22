@@ -10,8 +10,8 @@ func TestKeywords(t *testing.T) {
 					  A B X Y Z L R START DLEFT DRIGHT DUP DDOWN`);
 	//Check that for each token, the type matches the associated type in the keywordMap
 	//In other words, all keywords are mapped appropriately
-	if tok := sc.NextToken(); tok.Type() != keywordMap[tok.Identifier()] {
-		t.Errorf("Error, expected token type: %d, but got: %d", keywordMap[tok.Identifier()], tok.Type());
+	if tok := sc.NextToken(); tok.Type() != keywordMap[tok.Text()] {
+		t.Errorf("Error, expected token type: %d, but got: %d", keywordMap[tok.Text()], tok.Type());
 	}
 }
 
@@ -22,20 +22,20 @@ func TestIdentifier(t *testing.T) {
 	sc := NewScanner("these;are.some-identifiers");
 	if tok := sc.NextToken(); tok.Type() != token.IDENTIFIER {
 		t.Errorf("Error, expected token type: %d, but got: %d", token.IDENTIFIER, tok.Type());
-	} else if tok.Identifier() != "these" {
-		t.Errorf("Error, expected identifier string: %s, but got: %s", "these", tok.Identifier());
+	} else if tok.Text() != "these" {
+		t.Errorf("Error, expected identifier string: %s, but got: %s", "these", tok.Text());
 	}
 	sc.NextToken();
 	if tok := sc.NextToken(); tok.Type() != token.IDENTIFIER {
 		t.Errorf("Error, expected token type: %d, but got: %d", token.IDENTIFIER, tok.Type());
-	} else if tok.Identifier() != "are" {
-		t.Errorf("Error, expected identifier string: %s, but got: %s", "are", tok.Identifier());
+	} else if tok.Text() != "are" {
+		t.Errorf("Error, expected identifier string: %s, but got: %s", "are", tok.Text());
 	}
 	sc.NextToken();
 	if tok := sc.NextToken(); tok.Type() != token.IDENTIFIER {
 		t.Errorf("Error, expected token type: %d, but got: %d", token.IDENTIFIER, tok.Type());
-	} else if tok.Identifier() != "some-identifiers" {
-		t.Errorf("Error, expected identifier string: %s, but got: %s", "some-identifiers", tok.Identifier());
+	} else if tok.Text() != "some-identifiers" {
+		t.Errorf("Error, expected identifier string: %s, but got: %s", "some-identifiers", tok.Text());
 	}
 }
 

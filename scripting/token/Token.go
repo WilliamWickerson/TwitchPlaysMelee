@@ -6,7 +6,7 @@ import (
 
 type Token interface {
 	Type() Type;
-	Identifier() string;
+	Text() string;
 	Integer() (int, error);
 	Float() (float64, error);
 }
@@ -31,6 +31,7 @@ const (
 	HYPHEN;
 	OPENPAREN;
 	CLOSEPAREN;
+	PLUS;
 	KW_PRESS;
 	KW_UNPRESS;
 	KW_STICK;
@@ -60,7 +61,7 @@ func (t token) Type() Type {
 	return t.t;
 }
 
-func (t token) Identifier() string {
+func (t token) Text() string {
 	return t.s;
 }
 

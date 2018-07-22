@@ -18,6 +18,7 @@ semicolon := ;
 hyphen := -
 openParen := (
 closeParen := )
+plus := +
 
 
 Script := Command (semicolon (Command | ε))* (semicolon | ε)
@@ -27,10 +28,11 @@ Button := ButtonMinusLR | ButtonLR
 ButtonMinusLR := A | B | X | Y | Z | START | DLEFT | DRIGHT | DUP | DDOWN
 ButtonLR := L | R
 Duration := ε | Frames (comma Frames)*
-Frames := int-literal (ε | hyphen int-literal)
+Frames := Expression (ε | hyphen Expression)
+Expression := int-literal (ε | plus int-literal)
 StickCommand := (stick | cstick) Direction Duration
 Direction := (tilt | ε) (PairDirection | NamedDirections)
-PairDirection := (openParen (int-literal | float-literal) comma (int-literal | float-literal) closeParen)
+PairDirection := (openParen (ε | hyphen) (int-literal | float-literal) comma (ε | hyphen) (int-literal | float-literal) closeParen)
 NamedDirections := NamedDirection NamedDirection*
 NamedDirection := center | left | right | up | down | tilt
 MacroCommand := macro-identifier (int-literal | float-literal | namedDirection)* (ε | int-literal)
