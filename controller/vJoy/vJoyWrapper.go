@@ -22,11 +22,6 @@ type vJoyController struct {
 	handle C.uint;
 }
 
-var (
-	//Initialize so first controller gets value 1
-	nextHandle C.uint = 1;
-)
-
 /*
 Axes are implemented using #define in the header.
 using an enumeration with those values works well
@@ -45,12 +40,10 @@ const (
 	Sl1 = C.HID_USAGE_SL1;
 )
 
-func NewVJoyController() VJoyController {
+func NewVJoyController(handle int) VJoyController {
 	//Acquire the next controller and create object
-	C.AcquireVJD(C.uint(nextHandle));
-	c := vJoyController{nextHandle};
-	//Increment value for subsequent call
-	nextHandle++;
+	C.AcquireVJD(C.uint(handle));
+	c := vJoyController{C.uint(handle)};
 	return c;
 }
 

@@ -138,16 +138,16 @@ func TestDuration(t *testing.T) {
 }
 
 func TestMacroCommand(t *testing.T) {
-	parser := NewParser(NewScanner("wavedash 3 left 1"));
+	parser := NewParser(NewScanner("wavedash 3 left 2"));
 	gcArray := make([]controller.GamecubeController, AST.MAXFRAMEWINDOW);
 	for _,command := range parser.Parse() {
 		command.Execute(gcArray);
 	}
 	if !gcArray[1].X {
-		t.Errorf("Error, expected X button to be: true, but got: %t", gcArray[1]);
+		t.Errorf("Error, expected X button to be: true, but got: %t", gcArray[1].X);
 	}
 	if !gcArray[4].L {
-		t.Errorf("Error, expected L button to be: true, but got: %t", gcArray[4]);
+		t.Errorf("Error, expected L button to be: true, but got: %t", gcArray[4].L);
 	}
 	eps := .0000001;
 	if math.Abs(gcArray[4].STICKX - -math.Sqrt2 / 2) > eps {
@@ -155,6 +155,28 @@ func TestMacroCommand(t *testing.T) {
 	}
 	if math.Abs(gcArray[4].STICKY - -math.Sqrt2 / 2) > eps {
 		t.Errorf("Error, expected stick to be: %f, but got: %f", math.Sqrt2 / 2, gcArray[4].STICKY);
+	}
+}
+
+func TestMacroCommandDelay(t *testing.T) {
+	parser := NewParser(NewScanner("stick up; grab 2"));
+	gcArray := make([]controller.GamecubeController, AST.MAXFRAMEWINDOW);
+	commands := parser.Parse();
+	if len(commands) != 2 {
+		t.Errorf("Error, expected there to be 2 commands, but got: %d", len(commands));
+	}
+	for _,command := range commands {
+		command.Execute(gcArray);
+	}
+	eps := .0000001;
+	if math.Abs(gcArray[0].STICKY - 1) > eps {
+		t.Errorf("Error, expected stick to be: %f, but got: %f", 1, gcArray[0].STICKY);
+	}
+	if gcArray[0].Z {
+		t.Errorf("Error, expected Z button to be: false, but got: %t", gcArray[0].Z);
+	}
+	if !gcArray[1].Z {
+		t.Errorf("Error, expected Z button to be: true, but got: %t", gcArray[1].Z);
 	}
 }
 

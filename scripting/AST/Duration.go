@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	MAXFRAMEWINDOW = 60;
+	MAXFRAMEWINDOW = 90;
 )
 
 type Duration interface {

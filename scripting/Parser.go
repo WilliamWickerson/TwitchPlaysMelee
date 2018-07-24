@@ -191,6 +191,8 @@ func (p *parser) macroCommand() (AST.Command, error) {
 		text = AST.GetMacro(name, len(inputs) - 1);
 		if len(inputs) > 0 && inputs[len(inputs) - 1].Type() == token.INTLITERAL && text != "" {
 			delay,_ = inputs[len(inputs) - 1].Integer();
+			//Delay is 1-indexed so convert it to 0 index
+			delay -= 1;
 			inputs = inputs[:len(inputs) - 1];
 		} else {
 			return nil, errors.New("Macro does not exist");

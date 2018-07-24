@@ -1,10 +1,130 @@
 [
   {
-    "name" : "wavedash[2]",
-    "text" : "press x; stick down #2 #1+1; press l #1+1"
+    "name" : "walk[2]",
+    "text" : "stick tilt #1 1-2; stick #1 3-#2"
   },
   {
-    "name" : "up-tilt",
+    "name" : "dash[1]",
+    "text" : "stick #1 1-5"
+  },
+  {
+    "name" : "run[2]",
+    "text" : "stick #1 1-#2"
+  },
+  {
+    "name" : "wavedash[2]",
+    "text" : "short-hop; stick down #2 #1+1; press l #1+1"
+  },
+  {
+    "name" : "uptilt[0]",
     "text" : "stick tilt up; press a"
+  },
+  {
+    "name" : "ftilt[1]",
+    "text" : "stick tilt #1; press a"
+  },
+  {
+    "name" : "dtilt[0]",
+    "text" : "stick tilt down; press a"
+  },
+  {
+    "name" : "upb[0]",
+    "text" : "stick up; press b"
+  },
+  {
+    "name" : "sideb[1]",
+    "text" : "stick #1; press b"
+  },
+  {
+    "name" : "downb[0]",
+    "text" : "stick down; press b"
+  },
+  {
+    "name" : "upsmash[0]",
+    "text" : "cstick up"
+  },
+  {
+    "name" : "fsmash[1]",
+    "text" : "cstick #1"
+  },
+  {
+    "name" : "dsmash[0]",
+    "text" : "cstick down"
+  },
+  {
+    "name" : "shield[1]",
+    "text" : "press r 1-#1"
+  },
+  {
+    "name" : "light-shield[1]",
+    "text" : "press r .3 1-#1"
+  },
+  {
+    "name" : "spot-dodge[0]",
+    "text" : "shield 2; cstick down 2"
+  },
+  {
+    "name" : "roll[1]",
+    "text" : "shield 2; cstick #1 2"
+  },
+  {
+    "name" : "shield-drop[0]",
+    "text" : "shield 2; stick (.6875, -.675) 2"
+  },
+  {
+    "name" : "grab[0]",
+    "text" : "press z"
+  },
+  {
+    "name" : "jc-grab[0]",
+    "text" : "press x; grab 2"
+  },
+  {
+    "name" : "jc-upsmash[0]",
+    "text" : "press x; upsmash 2"
+  },
+  {
+    "name" : "taunt[0]",
+    "text" : "press dup"
+  },
+  {
+    "name" : "jump[0]",
+    "text" : "press x 1-5"
+  },
+  {
+    "name" : "short-hop[0]",
+    "text" : "press x"
+  },
+  {
+    "name" : "shop[0]",
+    "text" : "short-hop"
+  },
+  {
+    "name" : "jab[0]",
+    "text" : "press a"
+  },
+  {
+    "name" : "dair[0]",
+    "text" : "cstick down"
+  },
+  {
+    "name" : "nair[0]",
+    "text" : "press a; stick (0,0)"
+  },
+  {
+    "name" : "upair[0]",
+    "text" : "cstick up"
+  },
+  {
+    "name" : "lair[0]",
+    "text" : "cstick left"
+  },
+  {
+    "name" : "rair[0]",
+    "text" : "cstick right"
+  },
+  {
+    "name" : "ganondorf[0]",
+    "text" : "press b; stick (4,3) 1-60; stick (-1,-4) 61-65; press a 66;"
   }
 ]
