@@ -34,7 +34,6 @@ func ControllerLoop(messagech chan irc.TwitchMessage) {
 		for _,command := range commands {
 			command.Execute(gcArrays[team]);
 		}
-		go controller.SetvJoy(vJoys[team], gcArrays[team][0]);
 		<-controllerSemaphore;
 	}
 }
